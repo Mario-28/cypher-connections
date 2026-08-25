@@ -1,0 +1,61 @@
+{{! SVG connection template rendered within the connections-layer }}
+<g
+  class="connection-group"
+  data-conn-id="{{connection.id}}"
+  data-conn-type="{{connection.type}}"
+  data-from-id="{{connection.fromId}}"
+  data-to-id="{{connection.toId}}"
+>
+  {{! Invisible wider hit area for easier hover/click }}
+  <path
+    class="connection-hitarea"
+    d="{{pathD}}"
+    fill="none"
+    stroke="transparent"
+    stroke-width="12"
+    pointer-events="stroke"
+    data-conn-hitarea
+  />
+
+  {{! Visible connection path (bezier curve) }}
+  <path
+    class="connection-path"
+    d="{{pathD}}"
+    fill="none"
+    stroke="{{connColor}}"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    marker-end="url(#arrow-end-{{boardId}})"
+    style="color: {{connColor}};"
+    data-conn-path
+  />
+
+  {{! Midpoint icon group }}
+  <g
+    class="connection-midpoint"
+    transform="translate({{midpoint.x}}, {{midpoint.y}})"
+    data-conn-midpoint
+  >
+    {{! Circular background }}
+    <circle
+      class="midpoint-bg"
+      cx="0"
+      cy="0"
+      r="{{divide iconSize 1.6}}"
+      fill="rgba(20, 20, 35, 0.9)"
+      stroke="{{connColor}}"
+      stroke-width="1.5"
+      data-midpoint-bg
+    />
+
+    {{! Icon text }}
+    <text
+      class="fas midpoint-icon"
+      text-anchor="middle"
+      dominant-baseline="central"
+      fill="{{iconColor}}"
+      font-size="{{iconSize}}"
+      data-midpoint-icon
+    >{{connectionIcon}}</text>
+  </g>
+</g>

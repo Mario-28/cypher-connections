@@ -1,0 +1,19 @@
+{{! Individual tab button template for the board tab bar }}
+<div
+  class="board-tab {{#if (eq this.id ../activeBoardId)}}active{{/if}}"
+  data-board-id="{{this.id}}"
+  data-tab-id="{{this.id}}"
+  data-action="switch-board"
+  title="{{this.name}}"
+>
+  <span class="tab-name" data-board-name>{{this.name}}</span>
+  <button
+    type="button"
+    class="tab-close"
+    data-action="delete-board"
+    data-board-id="{{this.id}}"
+    title="{{localize 'CYPHERCONNECTIONS.PANEL.deleteBoard'}}"
+  >
+    <i class="fas fa-times"></i>
+  </button>
+</div>

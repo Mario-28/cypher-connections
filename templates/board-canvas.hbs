@@ -1,0 +1,125 @@
+{{! SVG-based canvas template for the investigation board }}
+<svg
+  class="board-canvas-svg"
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="{{board.viewBox.x}} {{board.viewBox.y}} {{board.viewBox.width}} {{board.viewBox.height}}"
+  preserveAspectRatio="xMidYMid slice"
+  data-board-canvas
+  data-board-id="{{board.id}}"
+>
+  {{! Definitions: markers, filters, patterns }}
+  <defs>
+    {{! Arrow marker for connection endpoints }}
+    <marker
+      id="arrow-end-{{board.id}}"
+      class="arrow-marker"
+      viewBox="0 0 10 10"
+      refX="9"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto-start-reverse"
+    >
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+    </marker>
+
+    {{! Arrow marker for connection start (bidirectional) }}
+    <marker
+      id="arrow-start-{{board.id}}"
+      class="arrow-marker"
+      viewBox="0 0 10 10"
+      refX="1"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto"
+    >
+      <path d="M 10 0 L 0 5 L 10 10 z" fill="currentColor" />
+    </marker>
+
+    {{! Glow filter for hover effects on items }}
+    <filter id="glow-{{board.id}}" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    {{! Selection glow filter }}
+    <filter id="glow-strong-{{board.id}}" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    {{! Grid pattern (dot grid) }}
+    <pattern
+      id="grid-pattern-{{board.id}}"
+      class="grid-pattern"
+      width="40"
+      height="40"
+      patternUnits="userSpaceOnUse"
+    >
+      <circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.15)" />
+    </pattern>
+
+    {{! Line grid pattern (alternative) }}
+    <pattern
+      id="line-grid-pattern-{{board.id}}"
+      class="line-grid-pattern"
+      width="40"
+      height="40"
+      patternUnits="userSpaceOnUse"
+    >
+      <path
+        d="M 40 0 L 0 0 0 40"
+        fill="none"
+        stroke="rgba(255,255,255,0.08)"
+        stroke-width="1"
+      />
+    </pattern>
+
+    {{! Shadow filter for nodes }}
+    <filter id="node-shadow-{{board.id}}" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  {{! Layer 1: Grid }}
+  <g class="grid-layer" data-grid-layer>
+    {{#if showGrid}}
+      <rect
+        x="{{board.viewBox.x}}"
+        y="{{board.viewBox.y}}"
+        width="{{board.viewBox.width}}"
+        height="{{board.viewBox.height}}"
+        fill="url(#line-grid-pattern-{{board.id}})"
+        pointer-events="none"
+      />
+    {{/if}}
+  </g>
+
+  {{! Layer 2: Connections }}
+  <g class="connections-layer" data-connections-layer></g>
+
+  {{! Layer 3: Items }}
+  <g class="items-layer" data-items-layer></g>
+
+  {{! Layer 4: Drag / temporary elements }}
+  <g class="drag-layer" data-drag-layer></g>
+
+  {{! Invisible rect covering full canvas for pan/drag events }}
+  <rect
+    class="canvas-event-capture"
+    x="{{board.viewBox.x}}"
+    y="{{board.viewBox.y}}"
+    width="{{board.viewBox.width}}"
+    height="{{board.viewBox.height}}"
+    fill="transparent"
+    pointer-events="all"
+    data-canvas-capture
+  />
+</svg>

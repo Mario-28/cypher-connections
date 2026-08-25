@@ -1,0 +1,32 @@
+{
+  "id": "cypher-connections",
+  "title": "Cypher Connections",
+  "description": "Visual investigation board with items, connections, and relationship mapping for Cypher System",
+  "version": "1.0.56",
+  "authors": [
+    {
+      "name": "Module Developer"
+    }
+  ],
+  "minimumCoreVersion": "14",
+  "compatibleCoreVersion": "14",
+  "esmodules": [
+    "scripts/module.js"
+  ],
+  "styles": [
+    "styles/connections.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "socket": true,
+  "flags": {
+    "cypher-connections": {
+      "configurable": true
+    }
+  }
+}

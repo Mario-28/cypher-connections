@@ -1,0 +1,275 @@
+
+/* ==========================================================================
+   Cypher Connections — DOM Panel Styles
+   ========================================================================== */
+
+/* ---- Panel Container ---- */
+.cc-panel {
+  font-family: var(--font-primary, "Signika", sans-serif);
+  font-size: 13px;
+  color: #e8e8e8;
+}
+
+/* ---- Panel Header ---- */
+.cc-panel-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, #0f3460, #1a1a2e);
+  border-bottom: 1px solid #2a2a4a;
+  cursor: grab;
+  user-select: none;
+  gap: 8px;
+}
+.cc-panel-header:active {
+  cursor: grabbing;
+}
+.cc-panel-title {
+  flex: 1;
+  font-weight: 600;
+  color: #c9a227;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-panel-header button {
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+.cc-panel-header button:hover {
+  color: #e8e8e8;
+}
+
+/* ---- Tabs ---- */
+.cc-panel-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid #2a2a4a;
+  background: rgba(15, 52, 96, 0.3);
+  overflow-x: auto;
+  min-height: 36px;
+}
+.cc-tab {
+  background: transparent;
+  border: 1px solid #2a2a4a;
+  color: #b0b0b0;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.cc-tab:hover {
+  border-color: #c9a227;
+  color: #e8e8e8;
+}
+.cc-tab.active {
+  background: #0f3460;
+  border-color: #c9a227;
+  color: #c9a227;
+}
+.cc-tab-add {
+  background: transparent;
+  border: 1px dashed #3a3a5a;
+  color: #c9a227;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.cc-tab-add:hover {
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.1);
+}
+
+/* ---- Content Area ---- */
+.cc-panel-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Toolbar ---- */
+.cc-panel-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-top: 1px solid #2a2a4a;
+  background: rgba(15, 52, 96, 0.3);
+}
+.cc-tb-btn {
+  background: transparent;
+  border: 1px solid #2a2a4a;
+  color: #b0b0b0;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.cc-tb-btn:hover {
+  border-color: #c9a227;
+  color: #e8e8e8;
+}
+.cc-tb-btn.active {
+  background: #0f3460;
+  border-color: #c9a227;
+  color: #c9a227;
+}
+.cc-tb-divider {
+  width: 1px;
+  height: 20px;
+  background: #2a2a4a;
+  margin: 0 4px;
+}
+
+/* ---- Primary Button ---- */
+.cc-btn-primary {
+  background: linear-gradient(135deg, #c9a227, #b08d1f);
+  border: none;
+  color: #1a1a2e;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+.cc-btn-primary:hover {
+  background: linear-gradient(135deg, #e0b840, #c9a227);
+  transform: translateY(-1px);
+}
+
+/* ---- Tooltip ---- */
+.cc-tooltip {
+  animation: cc-fade-in 0.15s ease;
+}
+@keyframes cc-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- SVG Canvas Items ---- */
+.item-node {
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.item-node:hover {
+  filter: drop-shadow(0 0 6px rgba(201, 162, 39, 0.5));
+}
+.item-node rect {
+  transition: stroke-width 0.2s ease, stroke 0.2s ease;
+}
+.item-node:hover rect {
+  stroke-width: 3;
+}
+
+/* ---- Resize Handle ---- */
+.cc-resize-handle {
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.cc-resize-handle:hover {
+  opacity: 1;
+}
+
+/* ---- Context Menu ---- */
+.cc-context-menu {
+  animation: cc-fade-in 0.1s ease;
+}
+.cc-ctx-item {
+  transition: background 0.1s;
+}
+
+/* ---- Form Elements (for dialogs) ---- */
+.cc-panel input[type="text"],
+.cc-panel textarea {
+  background: #0f3460;
+  border: 1px solid #2a2a4a;
+  color: #e8e8e8;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+.cc-panel input[type="text"]:focus,
+.cc-panel textarea:focus {
+  outline: none;
+  border-color: #c9a227;
+}
+
+/* ==========================================================================
+   Cypher Taskbar Integration — Connections Button
+   Injected into .ct-section-1, right of the JOURNAL (book) button.
+   Uses .ct-btn class from Cypher Taskbar for base sizing.
+   Only adds the border style to match STUFF and BOOK buttons.
+   ========================================================================== */
+
+.ct-connections-btn {
+  /* Inherit size/padding from .ct-btn — do NOT override width/height */
+  box-sizing: border-box;
+
+  /* Background & border — sampled from native Cypher Taskbar button */
+  background: rgba(23, 19, 48, 0.6);
+  border: 2px solid #b29662;
+  border-radius: var(--ct-btn-radius, 10px);
+  cursor: pointer;
+
+  /* Icon — matching gold tone */
+  color: #c8a96e;
+  font-size: var(--ct-btn-icon-size, 20px);
+
+  /* Flex centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Transition */
+  transition: all 0.2s ease;
+
+  /* Prevent selection */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hover — brighter gold */
+.ct-connections-btn:hover {
+  border-color: #c9a96e;
+  color: #e0c88e;
+  background: rgba(200, 169, 110, 0.15);
+}
+
+/* Active/pressed state */
+.ct-connections-btn:active {
+  transform: scale(0.95);
+}
+
+/* Panel-open state — filled bg */
+.ct-connections-btn.ct-btn-active {
+  border-color: #c9a96e;
+  background: rgba(200, 169, 110, 0.2);
+  color: #e0c88e;
+}
+
+/* Focus outline */
+.ct-connections-btn:focus-visible {
+  outline: 2px solid #c8a96e;
+  outline-offset: 2px;
+}

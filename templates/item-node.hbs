@@ -1,0 +1,81 @@
+{{! SVG item node template rendered within the items-layer }}
+<g
+  class="item-node"
+  data-item-id="{{item.id}}"
+  data-item-type="{{item.type}}"
+  transform="translate({{item.x}}, {{item.y}})"
+>
+  {{! Main node background with rounded corners and shadow }}
+  <rect
+    class="item-node-bg"
+    x="0"
+    y="0"
+    width="{{item.width}}"
+    height="{{item.height}}"
+    rx="8"
+    ry="8"
+    fill="rgba(30, 30, 50, 0.95)"
+    stroke="{{itemColor}}"
+    stroke-width="2"
+    filter="url(#node-shadow-{{boardId}})"
+    data-node-bg
+  />
+
+  {{! Selected state indicator (dashed border) }}
+  <rect
+    class="item-node-select"
+    x="-2"
+    y="-2"
+    width="{{add item.width 4}}"
+    height="{{add item.height 4}}"
+    rx="10"
+    ry="10"
+    fill="none"
+    stroke="{{itemColor}}"
+    stroke-width="2"
+    stroke-dasharray="6 3"
+    opacity="0"
+    pointer-events="none"
+    data-node-select
+  />
+
+  {{! Image or icon content }}
+  {{#if hasValidImage}}
+    <image
+      class="item-node-image"
+      x="4"
+      y="4"
+      width="{{subtract item.width 8}}"
+      height="{{subtract item.height 8}}"
+      rx="4"
+      href="{{item.img}}"
+      preserveAspectRatio="xMidYMid slice"
+      clip-path="inset(0px round 4px)"
+      data-node-image
+    />
+  {{else}}
+    <g class="item-node-icon" transform="translate({{divide item.width 2}}, {{divide item.height 2}})">
+      <text
+        class="fas"
+        text-anchor="middle"
+        dominant-baseline="central"
+        fill="{{itemColor}}"
+        font-size="28"
+        data-node-icon
+      >{{defaultIcon}}</text>
+    </g>
+  {{/if}}
+
+  {{! Item name label below the node }}
+  <text
+    class="item-node-label"
+    x="{{divide item.width 2}}"
+    y="{{add item.height 14}}"
+    text-anchor="middle"
+    dominant-baseline="central"
+    fill="#e0e0e0"
+    font-size="11"
+    font-family="sans-serif"
+    data-node-label
+  >{{item.name}}</text>
+</g>

@@ -1,0 +1,185 @@
+{{!--
+  Connection Dialog Template
+  Used for creating and editing Connections between BoardItems.
+  Context: { isEdit, connection, fromItem, toItem, connectionTypes: [] }
+--}}
+<div class="cypher-connections-dialog connection-dialog">
+  <header class="dialog-header">
+    <h2>
+      <i class="fas {{#if isEdit}}fa-pen-to-square{{else}}fa-link{{/if}}"></i>
+      {{#if isEdit}}{{localize "CYPHERCONNECTIONS.ConnectionEditTitle"}}{{else}}{{localize "CYPHERCONNECTIONS.ConnectionCreateTitle"}}{{/if}}
+    </h2>
+  </header>
+
+  {{!-- Connected Items Header --}}
+  <div class="connected-items-header">
+    <div class="item-preview from-item" data-item-id="{{fromItem.id}}">
+      {{#if fromItem.img}}
+        <img src="{{fromItem.img}}" alt="{{fromItem.name}}" />
+      {{else}}
+        <i class="fas fa-question-circle"></i>
+      {{/if}}
+      <span class="item-name">{{fromItem.name}}</span>
+    </div>
+    <div class="connection-label">
+      <i class="fas fa-arrow-right"></i>
+      <span>{{localize "CYPHERCONNECTIONS.ConnectedTo"}}</span>
+      <i class="fas fa-arrow-right"></i>
+    </div>
+    <div class="item-preview to-item" data-item-id="{{toItem.id}}">
+      {{#if toItem.img}}
+        <img src="{{toItem.img}}" alt="{{toItem.name}}" />
+      {{else}}
+        <i class="fas fa-question-circle"></i>
+      {{/if}}
+      <span class="item-name">{{toItem.name}}</span>
+    </div>
+  </div>
+
+  <form class="dialog-form" autocomplete="off">
+    {{!-- Connection Name --}}
+    <div class="form-group">
+      <label for="conn-name">
+        <i class="fas fa-tag"></i> {{localize "CYPHERCONNECTIONS.ConnectionName"}}
+      </label>
+      <input type="text" id="conn-name" name="name" value="{{connection.name}}"
+             placeholder="{{localize 'CYPHERCONNECTIONS.ConnectionNamePlaceholder'}}" />
+    </div>
+
+    {{!-- Icon Section --}}
+    <div class="form-group icon-section">
+      <label>{{localize "CYPHERCONNECTIONS.Icon"}}</label>
+      <div class="icon-config">
+        <div class="icon-preview-large" id="icon-preview">
+          <i class="fas {{connection.icon}}" style="color: {{connection.iconColor}}; font-size: {{connection.iconSize}}px;"></i>
+        </div>
+        <div class="icon-controls">
+          <button type="button" class="btn-choose-icon" data-action="chooseIcon">
+            <i class="fas fa-icons"></i> {{localize "CYPHERCONNECTIONS.ChooseIcon"}}
+          </button>
+          <div class="icon-size-control">
+            <label for="icon-size">{{localize "CYPHERCONNECTIONS.IconSize"}}</label>
+            <input type="range" id="icon-size" name="iconSize" min="16" max="64" 
+                   value="{{connection.iconSize}}" />
+            <span class="size-value" id="size-value">{{connection.iconSize}}px</span>
+          </div>
+          <div class="icon-color-control">
+            <label for="icon-color">{{localize "CYPHERCONNECTIONS.IconColor"}}</label>
+            <input type="color" id="icon-color" name="iconColor" 
+                   value="{{connection.iconColor}}" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{!-- Type Dropdown --}}
+    <div class="form-group">
+      <label for="conn-type">
+        <i class="fas fa-shapes"></i> {{localize "CYPHERCONNECTIONS.ConnectionType"}}
+      </label>
+      <select id="conn-type" name="type" required>
+        {{#each connectionTypes as |typeData|}}
+          <option value="{{typeData.id}}" data-color="{{typeData.color}}"
+            {{#if (eq ../connection.type typeData.id)}}selected{{/if}}>
+            {{typeData.label}}
+          </option>
+        {{/each}}
+      </select>
+      <div class="type-color-dot" id="type-color-dot" style="background-color: {{selectedTypeColor}};"></div>
+    </div>
+
+    {{!-- Tags Section --}}
+    <div class="form-group tags-section">
+      <label>
+        <i class="fas fa-tags"></i> {{localize "CYPHERCONNECTIONS.Tags"}}
+      </label>
+      <div class="tags-input-wrapper">
+        <input type="text" id="tag-input" 
+               placeholder="{{localize 'CYPHERCONNECTIONS.TagPlaceholder'}}" 
+               maxlength="30" />
+        <button type="button" class="btn-add-tag" data-action="addTag">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+      <div class="tags-list" id="tags-list">
+        {{#each connection.tags as |tag index|}}
+          <span class="tag-pill" data-index="{{index}}">
+            <span class="tag-text">{{tag}}</span>
+            <button type="button" class="tag-remove" data-action="removeTag" data-index="{{index}}">
+              <i class="fas fa-times"></i>
+            </button>
+          </span>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- Description --}}
+    <div class="form-group">
+      <label for="conn-description">
+        <i class="fas fa-align-left"></i> {{localize "CYPHERCONNECTIONS.Description"}}
+      </label>
+      <textarea id="conn-description" name="description" rows="4"
+                placeholder="{{localize 'CYPHERCONNECTIONS.DescriptionPlaceholder'}}">{{connection.description}}</textarea>
+    </div>
+
+    {{!-- Events Section --}}
+    <div class="form-group events-section">
+      <div class="events-header">
+        <label>
+          <i class="fas fa-calendar-days"></i> {{localize "CYPHERCONNECTIONS.Events"}}
+        </label>
+        <button type="button" class="btn-add-event" data-action="addEvent">
+          <i class="fas fa-plus"></i> {{localize "CYPHERCONNECTIONS.AddEvent"}}
+        </button>
+      </div>
+      <div class="events-list" id="events-list">
+        {{#each connection.events as |event index|}}
+          <div class="event-row" data-event-index="{{index}}" data-event-id="{{event.id}}">
+            <div class="event-fields">
+              <input type="text" class="event-name" name="events[{{index}}].name" 
+                     value="{{event.name}}" placeholder="{{localize 'CYPHERCONNECTIONS.EventNamePlaceholder'}}" />
+              <input type="date" class="event-date" name="events[{{index}}].date" 
+                     value="{{event.date}}" />
+              <textarea class="event-description" name="events[{{index}}].description" rows="2"
+                        placeholder="{{localize 'CYPHERCONNECTIONS.EventDescriptionPlaceholder'}}">{{event.description}}</textarea>
+            </div>
+            <div class="event-actions">
+              <button type="button" class="btn-move-up" data-action="moveEventUp" data-index="{{index}}"
+                      title="{{localize 'CYPHERCONNECTIONS.MoveUp'}}">
+                <i class="fas fa-chevron-up"></i>
+              </button>
+              <button type="button" class="btn-move-down" data-action="moveEventDown" data-index="{{index}}"
+                      title="{{localize 'CYPHERCONNECTIONS.MoveDown'}}">
+                <i class="fas fa-chevron-down"></i>
+              </button>
+              <button type="button" class="btn-delete-event" data-action="removeEvent" data-index="{{index}}"
+                      title="{{localize 'CYPHERCONNECTIONS.DeleteEvent'}}">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+      {{#unless connection.events.length}}
+        <div class="events-empty" id="events-empty">
+          <i class="fas fa-calendar-plus"></i>
+          <span>{{localize "CYPHERCONNECTIONS.NoEvents"}}</span>
+        </div>
+      {{/unless}}
+    </div>
+  </form>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn-cancel" data-action="cancel">
+      <i class="fas fa-xmark"></i> {{localize "CYPHERCONNECTIONS.Cancel"}}
+    </button>
+    {{#if isEdit}}
+      <button type="button" class="btn-delete" data-action="delete">
+        <i class="fas fa-trash"></i> {{localize "CYPHERCONNECTIONS.Delete"}}
+      </button>
+    {{/if}}
+    <button type="button" class="btn-save" data-action="save">
+      <i class="fas fa-check"></i> {{localize "CYPHERCONNECTIONS.Save"}}
+    </button>
+  </footer>
+</div>

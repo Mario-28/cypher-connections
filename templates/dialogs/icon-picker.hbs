@@ -1,0 +1,75 @@
+{{!--
+  Icon Picker Dialog Template
+  Grid of 50 Font Awesome icons organized by category.
+  Context: { currentIcon, categories: [], icons: [] }
+--}}
+<div class="cypher-connections-dialog icon-picker-dialog">
+  <header class="dialog-header">
+    <h2>
+      <i class="fas fa-icons"></i> {{localize "CYPHERCONNECTIONS.ChooseIcon"}}
+    </h2>
+  </header>
+
+  {{!-- Search Bar --}}
+  <div class="icon-search">
+    <i class="fas fa-search"></i>
+    <input type="text" id="icon-search-input" 
+           placeholder="{{localize 'CYPHERCONNECTIONS.IconSearchPlaceholder'}}" 
+           value="{{searchQuery}}" />
+    {{#if searchQuery}}
+      <button type="button" class="clear-search" data-action="clearSearch">
+        <i class="fas fa-times"></i>
+      </button>
+    {{/if}}
+  </div>
+
+  {{!-- Category Filters --}}
+  <div class="icon-categories">
+    {{#each categories as |cat|}}
+      <button type="button" class="category-btn {{#if cat.active}}active{{/if}}" 
+              data-category="{{cat.id}}" data-action="filterCategory">
+        {{cat.label}}
+      </button>
+    {{/each}}
+  </div>
+
+  {{!-- Icon Grid --}}
+  <div class="icon-grid" id="icon-grid">
+    {{#each icons as |icon|}}
+      <div class="icon-cell {{#if icon.selected}}selected{{/if}}" 
+           data-icon="{{icon.id}}" data-category="{{icon.category}}"
+           title="{{icon.label}}">
+        <div class="icon-display">
+          <i class="fas {{icon.id}}"></i>
+        </div>
+        <span class="icon-label">{{icon.label}}</span>
+      </div>
+    {{else}}
+      <div class="no-icons-found">
+        <i class="fas fa-magnifying-glass"></i>
+        <span>{{localize "CYPHERCONNECTIONS.NoIconsFound"}}</span>
+      </div>
+    {{/each}}
+  </div>
+
+  {{!-- Selected Info --}}
+  <div class="selected-icon-info" id="selected-icon-info">
+    {{#if selectedIcon}}
+      <div class="selected-preview">
+        <i class="fas {{selectedIcon.id}}"></i>
+        <span>{{selectedIcon.label}}</span>
+      </div>
+    {{else}}
+      <span class="no-selection">{{localize "CYPHERCONNECTIONS.NoIconSelected"}}</span>
+    {{/if}}
+  </div>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn-cancel" data-action="cancel">
+      <i class="fas fa-xmark"></i> {{localize "CYPHERCONNECTIONS.Cancel"}}
+    </button>
+    <button type="button" class="btn-confirm" data-action="confirm" {{#unless selectedIcon}}disabled{{/unless}}>
+      <i class="fas fa-check"></i> {{localize "CYPHERCONNECTIONS.Confirm"}}
+    </button>
+  </footer>
+</div>

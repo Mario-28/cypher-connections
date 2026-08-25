@@ -1,0 +1,85 @@
+{{!--
+  Item Dialog Template
+  Used for creating and editing BoardItem nodes on the investigation board.
+  Context: { isEdit, item: { name, type, img, description }, itemTypes: [] }
+--}}
+<div class="cypher-connections-dialog item-dialog">
+  <header class="dialog-header">
+    <h2>
+      <i class="fas {{#if isEdit}}fa-pen-to-square{{else}}fa-plus-circle{{/if}}"></i>
+      {{#if isEdit}}{{localize "CYPHERCONNECTIONS.ItemEditTitle"}}{{else}}{{localize "CYPHERCONNECTIONS.ItemCreateTitle"}}{{/if}}
+    </h2>
+  </header>
+
+  <form class="dialog-form" autocomplete="off">
+    {{!-- Name Field --}}
+    <div class="form-group">
+      <label for="item-name">
+        <i class="fas fa-tag"></i> {{localize "CYPHERCONNECTIONS.Name"}}
+      </label>
+      <input type="text" id="item-name" name="name" value="{{item.name}}" 
+             placeholder="{{localize 'CYPHERCONNECTIONS.NamePlaceholder'}}" required />
+    </div>
+
+    {{!-- Type Dropdown --}}
+    <div class="form-group">
+      <label for="item-type">
+        <i class="fas fa-shapes"></i> {{localize "CYPHERCONNECTIONS.Type"}}
+      </label>
+      <select id="item-type" name="type" required>
+        {{#each itemTypes as |typeData typeId|}}
+          <option value="{{typeId}}" data-color="{{typeData.color}}"
+            {{#if (eq ../item.type typeId)}}selected{{/if}}>
+            {{typeData.label}}
+          </option>
+        {{/each}}
+      </select>
+      <div class="type-preview">
+        <i class="fas {{selectedTypeIcon}}" id="type-icon-preview" style="color: {{selectedTypeColor}};"></i>
+      </div>
+    </div>
+
+    {{!-- Image Picker --}}
+    <div class="form-group">
+      <label>
+        <i class="fas fa-image"></i> {{localize "CYPHERCONNECTIONS.Image"}}
+      </label>
+      <div class="image-picker">
+        <input type="text" id="item-img" name="img" value="{{item.img}}"
+               placeholder="{{localize 'CYPHERCONNECTIONS.ImagePlaceholder'}}" />
+        <button type="button" class="file-browse-btn" data-action="browseFile"
+                title="{{localize 'CYPHERCONNECTIONS.BrowseFiles'}}">
+          <i class="fas fa-folder-open"></i>
+        </button>
+      </div>
+      <div class="image-preview" id="image-preview-area">
+        {{#if item.img}}
+          <img src="{{item.img}}" alt="{{localize 'CYPHERCONNECTIONS.ImagePreview'}}" />
+        {{else}}
+          <div class="image-placeholder">
+            <i class="fas fa-image"></i>
+            <span>{{localize "CYPHERCONNECTIONS.NoImage"}}</span>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+
+    {{!-- Description --}}
+    <div class="form-group">
+      <label for="item-description">
+        <i class="fas fa-align-left"></i> {{localize "CYPHERCONNECTIONS.Description"}}
+      </label>
+      <textarea id="item-description" name="description" rows="5"
+                placeholder="{{localize 'CYPHERCONNECTIONS.DescriptionPlaceholder'}}">{{item.description}}</textarea>
+    </div>
+  </form>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn-cancel" data-action="cancel">
+      <i class="fas fa-xmark"></i> {{localize "CYPHERCONNECTIONS.Cancel"}}
+    </button>
+    <button type="button" class="btn-save" data-action="save">
+      <i class="fas fa-check"></i> {{localize "CYPHERCONNECTIONS.Save"}}
+    </button>
+  </footer>
+</div>

@@ -1,0 +1,93 @@
+{{!--
+  Connection Tooltip Template
+  Dark card tooltip displayed on connection icon hover/click.
+  Context: { connection, typeData, fromItem, toItem }
+--}}
+<div class="connection-tooltip connection-info-tooltip" data-connection-id="{{connection.id}}">
+  {{!-- Header --}}
+  <div class="tooltip-header" style="border-color: {{typeData.color}};">
+    <div class="tooltip-title">
+      {{#if connection.name}}
+        <h4 style="color: {{typeData.color}};">{{connection.name}}</h4>
+      {{else}}
+        <h4 style="color: {{typeData.color}};">{{typeData.label}}</h4>
+      {{/if}}
+      <span class="type-badge" style="background-color: {{typeData.color}}20; color: {{typeData.color}};">
+        {{typeData.label}}
+      </span>
+    </div>
+  </div>
+
+  {{!-- Connected Items --}}
+  <div class="tooltip-items">
+    <div class="tooltip-item from">
+      {{#if fromItem.img}}
+        <img src="{{fromItem.img}}" alt="{{fromItem.name}}" />
+      {{else}}
+        <i class="fas fa-question-circle"></i>
+      {{/if}}
+      <span>{{fromItem.name}}</span>
+    </div>
+    <div class="tooltip-link">
+      <i class="fas fa-arrow-right" style="color: {{typeData.color}};"></i>
+    </div>
+    <div class="tooltip-item to">
+      {{#if toItem.img}}
+        <img src="{{toItem.img}}" alt="{{toItem.name}}" />
+      {{else}}
+        <i class="fas fa-question-circle"></i>
+      {{/if}}
+      <span>{{toItem.name}}</span>
+    </div>
+  </div>
+
+  {{!-- Tags --}}
+  {{#if connection.tags.length}}
+    <div class="tooltip-tags">
+      {{#each connection.tags as |tag|}}
+        <span class="tag-pill">{{tag}}</span>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{!-- Description --}}
+  {{#if connection.description}}
+    <div class="tooltip-body">
+      <div class="tooltip-description">{{connection.description}}</div>
+    </div>
+  {{/if}}
+
+  {{!-- Events --}}
+  {{#if connection.events.length}}
+    <div class="tooltip-events">
+      <div class="events-header-toggle">
+        <i class="fas fa-calendar-days"></i>
+        <span>{{localize "CYPHERCONNECTIONS.Events"}} ({{connection.events.length}})</span>
+        <i class="fas fa-chevron-down expand-icon"></i>
+      </div>
+      <div class="events-list collapsed">
+        {{#each connection.events as |event|}}
+          <div class="event-entry" data-event-id="{{event.id}}">
+            <div class="event-title">{{event.name}}</div>
+            {{#if event.date}}
+              <div class="event-date">{{formatDate event.date}}</div>
+            {{/if}}
+            {{#if event.description}}
+              <div class="event-desc">{{event.description}}</div>
+            {{/if}}
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  {{/if}}
+
+  {{!-- Footer / Controls (only when pinned) --}}
+  <div class="tooltip-footer {{#if pinned}}pinned{{/if}}">
+    <span class="hint">{{localize "CYPHERCONNECTIONS.ConnectionTooltipHint"}}</span>
+    {{#if pinned}}
+      <button type="button" class="btn-close-tooltip" data-action="closeTooltip">
+        <i class="fas fa-xmark"></i>
+      </button>
+    {{/if}}
+  </div>
+</div>

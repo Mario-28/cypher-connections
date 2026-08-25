@@ -1,0 +1,123 @@
+{{! Main panel template for Cypher Connections Board }}
+<div class="cypher-connections-panel">
+  {{! Tab Bar }}
+  <div class="board-tabs-bar">
+    <div class="board-tabs-list" data-tabs-list>
+      {{#each boards}}
+        {{> "modules/cypher-connections/templates/board-tab.hbs"}}
+      {{/each}}
+    </div>
+    <button
+      type="button"
+      class="board-tab-add"
+      data-action="add-board"
+      title="{{localize 'CYPHERCONNECTIONS.PANEL.addBoard'}}"
+    >
+      <i class="fas fa-plus"></i>
+    </button>
+  </div>
+
+  {{! Board Content Area }}
+  <div class="board-content">
+    {{#if boards.length}}
+      {{#each boards}}
+        {{#if (eq this.id ../activeBoardId)}}
+          <div
+            class="board-viewport"
+            data-board-viewport
+            data-board-id="{{this.id}}"
+          >
+            {{> "modules/cypher-connections/templates/board-canvas.hbs" board=this}}
+          </div>
+        {{/if}}
+      {{/each}}
+    {{else}}
+      {{! Empty State }}
+      <div class="board-empty-state">
+        <i class="fas fa-project-diagram empty-icon"></i>
+        <h3>{{localize 'CYPHERCONNECTIONS.PANEL.emptyState'}}</h3>
+        <p>{{localize 'CYPHERCONNECTIONS.PANEL.emptyState'}}</p>
+        <button type="button" class="btn-primary" data-action="add-board">
+          <i class="fas fa-plus"></i>
+          {{localize 'CYPHERCONNECTIONS.PANEL.addBoard'}}
+        </button>
+      </div>
+    {{/if}}
+  </div>
+
+  {{! Bottom Toolbar }}
+  {{#if boards.length}}
+    <div class="board-toolbar">
+      <div class="toolbar-group toolbar-zoom">
+        <button
+          type="button"
+          data-action="zoom-in"
+          title="{{localize 'CYPHERCONNECTIONS.HELP.zoom'}}"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
+        <button
+          type="button"
+          data-action="zoom-reset"
+          title="{{localize 'CYPHERCONNECTIONS.HELP.zoom'}}"
+        >
+          <i class="fas fa-compress"></i>
+        </button>
+        <button
+          type="button"
+          data-action="zoom-out"
+          title="{{localize 'CYPHERCONNECTIONS.HELP.zoom'}}"
+        >
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-group">
+        <button
+          type="button"
+          class="{{#if showGrid}}active{{/if}}"
+          data-action="toggle-grid"
+          title="{{localize 'CYPHERCONNECTIONS.SETTINGS.showGrid.name'}}"
+        >
+          <i class="fas fa-border-all"></i>
+        </button>
+        <button
+          type="button"
+          data-action="snap-grid"
+          class="{{#if snapToGrid}}active{{/if}}"
+          title="{{localize 'CYPHERCONNECTIONS.SETTINGS.snapToGrid.name'}}"
+        >
+          <i class="fas fa-magnet"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-group">
+        <button
+          type="button"
+          data-action="help"
+          title="{{localize 'CYPHERCONNECTIONS.HELP.help'}}"
+        >
+          <i class="fas fa-question-circle"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-spacer"></div>
+
+      <div class="toolbar-info">
+        <span class="board-name">{{currentBoard.name}}</span>
+        <span class="item-count">
+          <i class="fas fa-cubes"></i>
+          {{currentBoard.itemCount}}
+        </span>
+        <span class="connection-count">
+          <i class="fas fa-link"></i>
+          {{currentBoard.connectionCount}}
+        </span>
+      </div>
+    </div>
+  {{/if}}
+</div>
