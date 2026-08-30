@@ -61,6 +61,7 @@ export class BoardItem {
     this.width = data.width ?? ITEM_SIZE;
     this.height = data.height ?? ITEM_SIZE;
     this.created = data.created ?? now();
+    this.uuid = data.uuid ?? "";          // Foundry document UUID (if linked)
     // Appearance
     this.borderColor = data.borderColor ?? "";
     this.bgColor = data.bgColor ?? "";
@@ -87,6 +88,7 @@ export class BoardItem {
       width: this.width,
       height: this.height,
       created: this.created,
+      uuid: this.uuid,
       borderColor: this.borderColor,
       bgColor: this.bgColor,
       shape: this.shape,

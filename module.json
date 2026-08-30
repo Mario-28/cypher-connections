@@ -2,7 +2,7 @@
   "id": "cypher-connections",
   "title": "Cypher Connections",
   "description": "Visual investigation board with items, connections, and relationship mapping for Cypher System",
-  "version": "1.0.56",
+  "version": "1.0.62",
   "authors": [
     {
       "name": "Module Developer"

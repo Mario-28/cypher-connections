@@ -13,6 +13,13 @@ import { BoardSettingsDialog } from "./dialogs/board-settings-dialog.js";
 // Track the one panel instance per actor
 const _panels = new Map(); // actorId -> panel instance
 
+/** Simple HTML escape helper. */
+function _esc(str) {
+  const div = document.createElement("div");
+  div.textContent = str || "";
+  return div.innerHTML;
+}
+
 /**
  * Simple DOM-based panel for Cypher Connections.
  * Creates a floating div on the page, no ApplicationV2 needed.
@@ -79,6 +86,8 @@ export class BoardPanel {
     this._connectOnClick = null;
     this._connectOnKeyDown = null;
     this._dragTabState = null;  // Tab drag reorder state
+    this._suppressClose = false; // Prevent close during drop operations
+    this._locked = true;          // Default locked — editing disabled
 
     // Settings
     this.showGrid = game.settings.get(MODULE_ID, "showGrid") ?? true;
@@ -222,7 +231,13 @@ export class BoardPanel {
       font-size: 12px;
       flex-shrink: 0;
     `;
-    addTabBtn.addEventListener("click", () => this._onAddBoard());
+    addTabBtn.addEventListener("click", () => {
+      if (this._locked) {
+        ui.notifications.warn("Board is locked. Unlock to add boards.");
+        return;
+      }
+      this._onAddBoard();
+    });
     this._addTabBtn = addTabBtn;
 
     // === Content Area ===
@@ -256,6 +271,7 @@ export class BoardPanel {
       <span class="cc-tb-divider"></span>
       <button class="cc-tb-btn ${this.showGrid ? "active" : ""}" data-action="toggle-grid" title="Toggle Grid"><i class="fas fa-border-all"></i></button>
       <button class="cc-tb-btn ${this.snapToGrid ? "active" : ""}" data-action="snap-grid" title="Snap to Grid"><i class="fas fa-magnet"></i></button>
+      <button class="cc-tb-btn ${this._locked ? "" : "active"}" data-action="toggle-lock" title="${this._locked ? "Locked (click to unlock)" : "Unlocked (click to lock)"}"><i class="fas ${this._locked ? "fa-lock" : "fa-lock-open"}"></i></button>
       <span class="cc-tb-divider"></span>
       <button class="cc-tb-btn" data-action="add-item" title="Add Item"><i class="fas fa-plus-circle"></i></button>
       <div style="flex:1"></div>
@@ -330,6 +346,7 @@ export class BoardPanel {
       const nameSpan = document.createElement("span");
       nameSpan.textContent = board.name;
       nameSpan.addEventListener("dblclick", (e) => {
+        if (this._locked) return;
         e.stopPropagation();
         this._onRenameBoard(board.id, nameSpan, tab);
       });
@@ -337,9 +354,10 @@ export class BoardPanel {
       const closeX = document.createElement("span");
       closeX.innerHTML = "&times;";
       closeX.style.cssText = "margin-left:4px;opacity:0.5;font-weight:bold;";
-      closeX.addEventListener("mouseenter", () => closeX.style.opacity = "1");
+      closeX.addEventListener("mouseenter", () => { if (!this._locked) closeX.style.opacity = "1"; });
       closeX.addEventListener("mouseleave", () => closeX.style.opacity = "0.5");
       closeX.addEventListener("click", (e) => {
+        if (this._locked) return;
         e.stopPropagation();
         this._onDeleteBoard(board.id);
       });
@@ -350,6 +368,7 @@ export class BoardPanel {
       // Tab drag reorder
       tab.draggable = true;
       tab.addEventListener("dragstart", (e) => {
+        if (this._locked) { e.preventDefault(); return; }
         e.dataTransfer.setData("text/plain", board.id);
         e.dataTransfer.effectAllowed = "move";
         tab.style.opacity = "0.5";
@@ -364,6 +383,7 @@ export class BoardPanel {
       });
       tab.addEventListener("drop", async (e) => {
         e.preventDefault();
+        if (this._locked) return;
         const draggedId = e.dataTransfer.getData("text/plain");
         if (!draggedId || draggedId === board.id) return;
         const draggedIdx = this.boards.findIndex(b => b.id === draggedId);
@@ -378,6 +398,7 @@ export class BoardPanel {
 
       // Right-click context menu on tab
       tab.addEventListener("contextmenu", (e) => {
+        if (this._locked) return; // No context menu when locked
         e.preventDefault();
         e.stopPropagation();
 
@@ -1088,16 +1109,27 @@ export class BoardPanel {
     });
 
     svg.addEventListener("drop", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      svg.style.cursor = "grab";
+      this._suppressClose = true;
+      try {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-      // Get drop position in SVG coordinates (always needed)
-      const rect = svg.getBoundingClientRect();
-      const pt = svg.createSVGPoint();
-      pt.x = e.clientX - rect.left;
-      pt.y = e.clientY - rect.top;
-      const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
+        // When locked, reject drops
+        if (this._locked) {
+          ui.notifications.warn("Board is locked. Unlock to add items.");
+          return;
+        }
+
+        svg.style.cursor = "grab";
+
+        // Get drop position in SVG coordinates (always needed)
+        // Use the SVG's coordinate system directly — getScreenCTM() already accounts
+        // for the element's screen position, so we pass clientX/clientY directly.
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX;
+        pt.y = e.clientY;
+        const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
 
       // Try multiple data formats: JSON (blue hand) → URI list → raw URL → files
       let raw = e.dataTransfer.getData("text/plain");
@@ -1136,8 +1168,9 @@ export class BoardPanel {
             img: imgUrl, x: svgP.x, y: svgP.y, width: ITEM_SIZE, height: ITEM_SIZE
           });
           board.items.push(item); board.updated = Date.now();
-          await this._persistBoards(); this._renderItem(item);
+          this._renderItem(item);
           ui.notifications.info(`Added image to board.`);
+          await this._persistBoards();
           return;
         }
       }
@@ -1154,8 +1187,9 @@ export class BoardPanel {
           img: trimmed, x: svgP.x, y: svgP.y, width: ITEM_SIZE, height: ITEM_SIZE
         });
         board.items.push(item); board.updated = Date.now();
-        await this._persistBoards(); this._renderItem(item);
+        this._renderItem(item);
         ui.notifications.info(`Added image to board.`);
+        await this._persistBoards();
         return;
       }
 
@@ -1187,25 +1221,43 @@ export class BoardPanel {
           boardId: board.id, type: itemType,
           name: data.name || doc.name || "Dropped Item",
           img, description: doc.system?.description || doc.content || "",
-          x: svgP.x, y: svgP.y, width: ITEM_SIZE, height: ITEM_SIZE
+          x: svgP.x, y: svgP.y, width: ITEM_SIZE, height: ITEM_SIZE,
+          uuid: doc.uuid || uuid
         });
 
         board.items.push(item); board.updated = Date.now();
-        await this._persistBoards(); this._renderItem(item);
+        this._renderItem(item);
         ui.notifications.info(`Added "${item.name}" to board.`);
+        await this._persistBoards();
       } catch (err) {
         console.error(`[${MODULE_ID}] Drop handling error:`, err);
         ui.notifications.error("Failed to add dropped item: " + err.message);
+      }
+
+      // Safety: ensure panel is still attached after async drop handling
+      if (this.element && !this.element.isConnected) {
+        document.body.appendChild(this.element);
+      }
+      } finally {
+        this._suppressClose = false;
       }
     });
   }
 
   _onItemMouseDown(event, item) {
-    // Only left-click (button 0) initiates drag
+    // Only left-click (button 0)
     if (event.button !== 0) return;
 
     // During connect mode, don't interfere
     if (this._connectMode) return;
+
+    // When locked, click opens item info instead of dragging
+    if (this._locked) {
+      event.preventDefault();
+      event.stopPropagation();
+      this._showItemInfo(item);
+      return;
+    }
 
     event.preventDefault();
     event.stopPropagation();
@@ -1276,6 +1328,23 @@ export class BoardPanel {
     event.preventDefault();
     event.stopPropagation();
 
+    // When locked, open original item sheet if linked, else show info
+    if (this._locked) {
+      if (item.uuid) {
+        try {
+          const doc = await fromUuid(item.uuid);
+          if (doc?.sheet) {
+            doc.sheet.render(true);
+            return;
+          }
+        } catch (err) {
+          console.warn(`[${MODULE_ID}] Could not open sheet for ${item.uuid}:`, err);
+        }
+      }
+      this._showItemInfo(item);
+      return;
+    }
+
     const { ItemDialog } = await import("./dialogs/item-dialog.js");
     const data = await ItemDialog(item);
     if (data === false) {
@@ -1293,11 +1362,50 @@ export class BoardPanel {
   }
 
   /**
+   * Show a read-only info popup for an item (used when board is locked).
+   */
+  _showItemInfo(item) {
+    const typeData = ITEM_TYPES[item.type] || { label: item.type, color: "#607d8b" };
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;";
+
+    const card = document.createElement("div");
+    card.style.cssText = "background:linear-gradient(180deg,#1a1a2e,#16213e);border:1px solid #2a2a4a;border-radius:8px;width:360px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.6);font-family:var(--font-primary,'Signika',sans-serif);font-size:13px;color:#e8e8e8;overflow:hidden;";
+
+    const imgHtml = item.img ? `<img src="${_esc(item.img)}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:2px solid ${typeData.color};">` : `<div style="width:64px;height:64px;border-radius:6px;border:2px solid ${typeData.color};display:flex;align-items:center;justify-content:center;background:rgba(15,52,96,0.3);"><i class="fas fa-image" style="color:${typeData.color};font-size:24px;"></i></div>`;
+
+    card.innerHTML = `
+      <div style="padding:12px 16px;background:linear-gradient(90deg,#0f3460,#1a1a2e);border-bottom:1px solid #2a2a4a;display:flex;align-items:center;gap:12px;">
+        ${imgHtml}
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;color:#c9a227;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_esc(item.name) || "Unnamed"}</div>
+          <div style="font-size:11px;color:${typeData.color};margin-top:2px;"><i class="fas ${typeData.icon || 'fa-circle'}"></i> ${typeData.label}</div>
+        </div>
+        <button id="ccInfoClose" style="background:none;border:none;color:#b0b0b0;cursor:pointer;font-size:14px;padding:4px;"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+        ${item.description ? `<div style="color:#b0b0b0;font-size:12px;line-height:1.5;">${_esc(item.description)}</div>` : `<div style="color:#666;font-size:12px;font-style:italic;">No description.</div>`}
+        <div style="border-top:1px solid #2a2a4a;padding-top:8px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:#888;">
+          <span><i class="fas fa-arrows-alt" style="color:#607d8b;"></i> ${Math.round(item.x)}, ${Math.round(item.y)}</span>
+          ${item.shape && item.shape !== "rect" ? `<span><i class="fas fa-shapes" style="color:#607d8b;"></i> ${_esc(item.shape)}</span>` : ""}
+        </div>
+      </div>
+    `;
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
+    card.querySelector("#ccInfoClose")?.addEventListener("click", () => overlay.remove());
+  }
+
+  /**
    * Double-click an item to enter "connect mode".
    * A dashed line follows the mouse from the source item.
    * Click another item to connect. Press Escape or click empty space to cancel.
    */
   _onItemDoubleClick(event, fromItem) {
+    if (this._locked) return; // No connect mode when locked
     event.stopPropagation();
     event.preventDefault();
     this._enterConnectMode(fromItem);
@@ -1308,6 +1416,7 @@ export class BoardPanel {
    * from the given source item until the user clicks a target or cancels.
    */
   _enterConnectMode(fromItem) {
+    if (this._locked) return; // Safety: no connect mode when locked
     if (this._connectMode) this._exitConnectMode();
 
     const svg = this._svgEl;
@@ -1696,6 +1805,10 @@ export class BoardPanel {
   }
 
   async _onAddItemAt(x, y) {
+    if (this._locked) {
+      ui.notifications.warn("Board is locked. Unlock to add items.");
+      return;
+    }
     const board = this.getCurrentBoard();
     if (!board) return;
 
@@ -1780,6 +1893,7 @@ export class BoardPanel {
   }
 
   async _onConnectionClick(conn) {
+    if (this._locked) return; // No connection editing when locked
     const board = this.getCurrentBoard();
     if (!board) return;
     const fromItem = board.items?.find(i => i.id === conn.fromId);
@@ -1837,7 +1951,35 @@ export class BoardPanel {
         if (board) this._onAddItemAt(0, 0);
         break;
       }
+      case "toggle-lock":
+        this._onToggleLock(btn);
+        break;
     }
+  }
+
+  /**
+   * Toggle the panel lock state.
+   * Locked = normal appearance, no editing allowed.
+   * Unlocked = red tinted, all editing allowed.
+   */
+  _onToggleLock(btn) {
+    this._locked = !this._locked;
+
+    // Update button appearance
+    const icon = btn.querySelector("i");
+    if (icon) {
+      icon.className = `fas ${this._locked ? "fa-lock" : "fa-lock-open"}`;
+    }
+    btn.title = this._locked ? "Locked (click to unlock)" : "Unlocked (click to lock)";
+    btn.classList.toggle("active", !this._locked);
+
+    // Apply/remove red tint on the panel
+    if (this.element) {
+      this.element.classList.toggle("cc-unlocked", !this._locked);
+    }
+
+    // Show notification
+    ui.notifications.info(this._locked ? "Board locked." : "Board unlocked — editing enabled.");
   }
 
   _zoom(factor) {
@@ -2289,6 +2431,10 @@ export class BoardPanel {
   }
 
   async close() {
+    if (this._suppressClose) {
+      console.log(`[${MODULE_ID}] Panel close suppressed (drop in progress).`);
+      return;
+    }
     this._exitConnectMode(); // Clean up any active connect mode
     await this._savePosition(); // Remember where the panel was
     if (this.element) {

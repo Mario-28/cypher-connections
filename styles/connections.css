@@ -215,6 +215,39 @@
   border-color: #c9a227;
 }
 
+/* ---- Unlocked State (Red Tint) ---- */
+.cc-panel.cc-unlocked {
+  border-color: #cc3333 !important;
+  box-shadow: 0 0 0 1px #cc3333, 0 8px 32px rgba(204, 51, 51, 0.3) !important;
+}
+.cc-panel.cc-unlocked .cc-panel-header {
+  background: linear-gradient(90deg, #661111, #1a1a2e) !important;
+  border-bottom-color: #cc3333 !important;
+}
+.cc-panel.cc-unlocked .cc-panel-tabs {
+  border-bottom-color: #cc3333 !important;
+}
+.cc-panel.cc-unlocked .cc-panel-toolbar {
+  border-top-color: #cc3333 !important;
+}
+.cc-panel.cc-unlocked .cc-tb-btn.active {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+.cc-panel.cc-unlocked::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(204, 51, 51, 0.04);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+.cc-panel.cc-unlocked > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* ==========================================================================
    Cypher Taskbar Integration — Connections Button
    Injected into .ct-section-1, right of the JOURNAL (book) button.
